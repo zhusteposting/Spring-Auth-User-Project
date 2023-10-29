@@ -7,6 +7,7 @@ import com.eposting.epost.repository.UserRepository;
 import com.eposting.epost.security.UserPrincipal;
 import com.eposting.epost.security.oauth2.user.OAuth2UserInfo;
 import com.eposting.epost.security.oauth2.user.OAuth2UserInfoFactory;
+import com.eposting.epost.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -27,6 +28,9 @@ public class CustomOidcUserService extends OidcUserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public OidcUser loadUser(OidcUserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
@@ -57,24 +61,12 @@ public class CustomOidcUserService extends OidcUserService {
                         user.getProvider() + " account. Please use your " + user.getProvider() +
                         " account to login.");
             }
-            user = updateExistingUser(user, oAuth2UserInfo);
+            user = userService.updateExistingUser(user, oAuth2UserInfo);
         } else {
-            user = registerNewUser(oAuth2UserRequest, oAuth2UserInfo);
+            user = userService.registerNewUser(oAuth2UserRequest, oAuth2UserInfo);
         }
 
         return UserPrincipal.create(user, oAuth2User.getAttributes());
-    }
-
-    private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
-        User user = new User();
-
-        user.setProvider(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()));
-        user.setEmail(oAuth2UserInfo.getEmail());
-        return userRepository.save(user);
-    }
-
-    private User updateExistingUser(User existingUser, OAuth2UserInfo oAuth2UserInfo) {
-        return userRepository.save(existingUser);
     }
 
 }
