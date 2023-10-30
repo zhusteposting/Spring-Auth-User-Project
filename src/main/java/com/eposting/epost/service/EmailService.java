@@ -19,6 +19,10 @@ public class EmailService {
         return emailRepository.save(emailModel);
     }
 
+    public void deleteByEmail(String email) {
+        emailRepository.deleteByEmail(email);
+    }
+
     public List<Email> getAll() {
         return emailRepository.findAll();
     }

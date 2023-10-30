@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EmailRepository extends MongoRepository<Email, String> {
-
+    void deleteByEmail(String email);
 }
