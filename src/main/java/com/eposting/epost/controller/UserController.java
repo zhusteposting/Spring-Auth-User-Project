@@ -4,15 +4,18 @@ import com.eposting.epost.exception.ResourceNotFoundException;
 import com.eposting.epost.model.User;
 import com.eposting.epost.model.dto.ProfileDTO;
 import com.eposting.epost.model.dto.UserDTO;
+import com.eposting.epost.payload.ChangePasswordRequest;
 import com.eposting.epost.repository.UserRepository;
 import com.eposting.epost.security.CurrentUser;
 import com.eposting.epost.security.UserPrincipal;
 import com.eposting.epost.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,5 +68,19 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ProfileDTO updateProfile(@CurrentUser UserPrincipal userPrincipal, @RequestBody ProfileDTO profileDTO) {
         return userService.updateProfile(userPrincipal.getId(), profileDTO);
+    }
+
+    @PostMapping("/change-password")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> changePassword(@CurrentUser UserPrincipal userPrincipal,
+                                            @RequestBody ChangePasswordRequest request) {
+        return userService.changePassword(request.getOldPass(), request.getNewPass(), userPrincipal.getId());
+    }
+
+    @PostMapping("/{id}/change-password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> changePasswordAdmin(@PathVariable String id,
+                                            @RequestBody ChangePasswordRequest request) {
+        return userService.changePassword(request.getOldPass(), request.getNewPass(), id);
     }
 }
